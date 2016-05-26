@@ -14,6 +14,32 @@ exports = module.exports = function(req, res) {
 	var cleanFilters = {};
 	var queryFilters = req.list.getSearchFilters(req.query.search, filters);
 	var columns = (req.query.cols) ? req.list.expandColumns(req.query.cols) : req.list.defaultColumns;
+	
+	var tmpListFilter = req.list.options.filter;
+    var listFilter;
+    if(typeof tmpListFilter=== 'function') {
+        listFilter = req.list.options.filter.bind(req)();
+    }
+    else {
+        listFilter = tmpListFilter;
+    }
+    queryFilters = _.extend(queryFilters, listFilter);
+
+    if(typeof req.list.get('nodelete') === 'function') {
+        req.list.set('nodelete', req.list.get('nodelete').bind(req)());
+    }
+
+    if(typeof req.list.get('noedit') === 'function') {
+        req.list.set('noedit', req.list.get('noedit').bind(req)());
+    }
+
+    if(typeof req.list.get('nocreate') === 'function') {
+        req.list.set('nocreate', req.list.get('nocreate').bind(req)());
+    }
+
+    if(typeof req.list.get('hidden') === 'function') {
+        req.list.set('hidden', req.list.get('hidden').bind(req)());
+    }
 
 	_.each(filters, function(filter, path) {
 		cleanFilters[path] = _.omit(filter, 'field');

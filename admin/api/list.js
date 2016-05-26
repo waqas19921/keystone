@@ -29,7 +29,17 @@ exports = module.exports = function(req, res) {
 			var skip = limit * (page - 1);
 				
 			var filters = req.list.getSearchFilters(req.query.q);
-
+			
+			var tmpListFilter = req.list.options.filter;
+			var listFilter;
+			if(typeof tmpListFilter=== 'function') {
+				listFilter = req.list.options.filter.bind(req)();
+			}
+			else {
+				listFilter = tmpListFilter;
+			}
+			filters = _.extend(filters, listFilter);
+			
 			var count = req.list.model.count(filters);
 			var query = req.list.model.find(filters)
 				.limit(limit)
@@ -153,6 +163,17 @@ exports = module.exports = function(req, res) {
 			(function() {
 
 				var queryFilters = req.list.getSearchFilters(req.query.search, req.query.filters);
+				
+				var tmpListFilter = req.list.options.filter;
+				var listFilter;
+				if(typeof tmpListFilter=== 'function') {
+					listFilter = req.list.options.filter.bind(req)();
+				}
+				else {
+					listFilter = tmpListFilter;
+				}
+				queryFilters = _.extend(queryFilters, listFilter);
+				
 				var skip = parseInt(req.query.items.last) - 1;
 				var querystring = require('querystring');
 				var link_to = function(params) {

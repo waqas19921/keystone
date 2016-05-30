@@ -174,7 +174,7 @@ cloudinaryimages.prototype.addToSchema = function() {
 		}
 		var img = images[id];
 		if (!img) return;
-		if (method === 'delete') {
+		if (method === 'delete' || method === 'remove') {
 			cloudinary.uploader.destroy(img.public_id, function() {});
 		}
 		images.splice(id, 1);

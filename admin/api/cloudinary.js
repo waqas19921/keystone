@@ -46,8 +46,46 @@ exports = module.exports = {
 					items: result.resources
 				});
 			}
-		}, { 
+		}, {
+			resource_type: type,
 			type: 'upload',
+			prefix: prefix,
+			max_results: max,
+			next_cursor: next
+		});
+	},
+	autocompletemedia: function (req, res) {
+		var imageResult;
+
+		var max = req.query.max || 10;
+		var prefix = req.query.prefix || '';
+		var next = req.query.next || null;
+
+		cloudinary.api.resources(function (imgResult) {
+			if (imgResult.error) {
+				res.json({ error: { message: imgResult.error.message } });
+			} else {
+				imageResult = imgResult.resources;
+				cloudinary.api.resources(function (videoResult) {
+					if (videoResult.error) {
+						res.json({ error: { message: videoResult.error.message } });
+					} else {
+						var combinedResult = imageResult.concat(videoResult.resources);
+						res.json({
+							next: videoResult.next_cursor,
+							items: combinedResult
+						});
+					}
+				}, {
+					resource_type: 'video',
+					type: 'upload',
+					prefix: prefix,
+					max_results: max,
+					next_cursor: next
+				});
+			}
+		}, {
+			resource_type: 'image',
 			prefix: prefix,
 			max_results: max,
 			next_cursor: next

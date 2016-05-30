@@ -2,6 +2,7 @@ module.exports = {
 	azurefile:        require('../../fields/types/azurefile/AzureFileField'),
 	boolean:          require('../../fields/types/boolean/BooleanField'),
 	cloudinaryimage:  require('../../fields/types/cloudinaryimage/CloudinaryImageField'),
+	cloudinarymedia:  require('../../fields/types/cloudinarymedia/CloudinaryMediaField'),
 	cloudinaryimages: require('../../fields/types/cloudinaryimages/CloudinaryImagesField'),
 	code:             require('../../fields/types/code/CodeField'),
 	color:            require('../../fields/types/color/ColorField'),

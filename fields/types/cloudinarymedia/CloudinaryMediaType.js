@@ -10,7 +10,7 @@ var util = require('util');
 var utils = require('keystone-utils');
 var MPromise = require('mpromise');
 
-var CLOUDINARY_FIELDS = ['public_id', 'version', 'signature', 'format', 'resource_type', 'url', 'width', 'height', 'secure_url'];
+var CLOUDINARY_FIELDS = ['public_id', 'version', 'signature', 'format', 'resource_type', 'url', 'width', 'height', 'secure_url', 'thumbnail_url'];
 
 function getEmptyValue () {
 	return {
@@ -22,7 +22,8 @@ function getEmptyValue () {
 		url: '',
 		width: 0,
 		height: 0,
-		secure_url: ''
+		secure_url: '',
+		thumbnail_url: ''
 	};
 }
 
@@ -87,6 +88,7 @@ cloudinarymedia.prototype.addToSchema = function () {
 		width: this._path.append('.width'),
 		height: this._path.append('.height'),
 		secure_url: this._path.append('.secure_url'),
+		thumbnail_url: this._path.append('.thumbnail_url'),
 		// virtuals
 		exists: this._path.append('.exists'),
 		folder: this._path.append('.folder'),
@@ -105,7 +107,8 @@ cloudinarymedia.prototype.addToSchema = function () {
 		url: String,
 		width: Number,
 		height: Number,
-		secure_url: String
+		secure_url: String,
+		thumbnail_url: String
 	});
 
 	schema.add(schemaPaths);
@@ -335,8 +338,8 @@ cloudinarymedia.prototype.updateItem = function (item, data) {
 			}
 		}
 	};
-    
-	_.each(['public_id', 'version', 'signature', 'format', 'resource_type', 'url', 'width', 'height', 'secure_url'], setValue);
+
+	_.each(['public_id', 'version', 'signature', 'format', 'resource_type', 'url', 'width', 'height', 'secure_url', 'thumbnail_url'], setValue);
 };
 
 /**
@@ -447,11 +450,24 @@ cloudinarymedia.prototype.getRequestHandler = function (item, req, paths, callba
 				imageDelete = field.apply(item, 'delete');
 			}
 
+			var getThumbnailUrl = function(data) {
+				var url = data.url;
+				if (url) {
+					url = url.replace(/image\/upload/, 'image/upload/c_thumb,g_face,h_90,w_90');
+					if (data.resource_type === 'video') {
+						var format = data.format;
+						url = url.replace(format, 'jpg');
+					}
+				}
+				return url;
+			};
+
 			// callback to be called upon completion of the 'upload' method
 			var uploadComplete = function (result) {
 				if (result.error) {
 					callback(result.error);
 				} else {
+					result.thumbnail_url = getThumbnailUrl(result);
 					item.set(field.path, result);
 					callback();
 				}

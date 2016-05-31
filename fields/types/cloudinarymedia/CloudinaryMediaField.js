@@ -17,12 +17,12 @@ const SUPPORTED_TYPES = ['image/gif', 'image/png', 'image/jpeg', 'image/bmp', 'i
 module.exports = Field.create({
 
 	displayName: 'CloudinaryMediaField',
-	
+
 	showVideo(url, format) {
-    
-	return <video controls='' autoplay='' name='media'>
+
+		<video controls='' autoplay='' name='media'>
 			<source src={url} type={format} />
-			</video>;
+		</video>;
 	},
 
 	fileFieldNode () {
@@ -222,20 +222,20 @@ module.exports = Field.create({
 			values = (
 				<div className="image-values">
 					<div className='field-value'>{this.props.value.url}</div>
-			{
-			 // TODO: move this somewhere better when appropriate
-			 //this.renderMediaDimensions()
-			 }
-			</div>
-		);
+					{
+						// TODO: move this somewhere better when appropriate
+						//this.renderMediaDimensions()
+					}
+				</div>
+			);
 		}
 
 		return (
 			<div key={this.props.path + '_details'} className="image-details">
-			{values}
-		{add}
-	</div>
-	);
+				{values}
+				{add}
+			</div>
+		);
 	},
 
 	renderMediaDimensions () {
@@ -255,19 +255,19 @@ module.exports = Field.create({
 				<div className='upload-queued pull-left'>
 					<div className='alert alert-success'>Media selected - save to upload</div>
 				</div>
-		);
+			);
 		} else if (this.state.origin === 'cloudinary') {
 			return (
 				<div className='select-queued pull-left'>
 					<div className='alert alert-success'>Media selected from Cloudinary</div>
 				</div>
-		);
+			);
 		} else if (this.state.removeExisting) {
 			return (
 				<div className='delete-queued pull-left'>
 					<div className='alert alert-danger'>Video {this.props.autoCleanup ? 'deleted' : 'removed'} - save to confirm</div>
 				</div>
-		);
+			);
 		} else {
 			return null;
 		}
@@ -285,7 +285,7 @@ module.exports = Field.create({
 				<button type='button' className='btn btn-link btn-cancel btn-undo-image' onClick={this.undoRemove}>
 					Undo Remove
 				</button>
-		);
+			);
 		} else {
 			var clearText;
 			if (this.hasLocal()) {
@@ -360,16 +360,16 @@ module.exports = Field.create({
 
 		return (
 			<div className="image-select">
-			<Select.Async
-		placeholder="Search for an image from Cloudinary ..."
-		name={this.props.paths.select}
-		value={this.state.selectedCloudinaryMedia}
-		onChange={onChange}
-		id={'field_' + this.props.paths.select}
-		loadOptions={getOptions}
-			/>
+				<Select.Async
+					placeholder="Search for an image from Cloudinary ..."
+					name={this.props.paths.select}
+					value={this.state.selectedCloudinaryMedia}
+					onChange={onChange}
+					id={'field_' + this.props.paths.select}
+					loadOptions={getOptions}
+				/>
 			</div>
-	);
+		);
 	},
 
 	// renderNote () {
@@ -398,19 +398,19 @@ module.exports = Field.create({
 			}
 		}
 		return (
-			
+
 			<div className='field field-type-cloudinaryimage'>
-			<label className='field-label'>{this.props.label}</label>
+				<label className='field-label'>{this.props.label}</label>
 
 				{this.renderFileField()}
 				{this.renderFileAction()}
-			
-			<div className={fieldClassName}>
-				<div className='image-container'>{container}</div>
-				{body}
-				<Note note={this.props.note} />
+
+				<div className={fieldClassName}>
+					<div className='image-container'>{container}</div>
+					{body}
+					<Note note={this.props.note} />
+				</div>
 			</div>
-			</div>
-	);
+		);
 	}
 });

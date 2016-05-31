@@ -50,6 +50,12 @@ module.exports = Field.create({
 		}
 	},
 
+	getThumbnailURL () {
+		if (!this.hasLocal() && this.hasExisting()) {
+			return this.props.value.thumbnail_url;
+		}
+	},
+	
 	/**
 	 * Reset origin and removal.
 	 */
@@ -59,7 +65,7 @@ module.exports = Field.create({
 			removeExisting: false,
 			localSource: null,
 			origin: false,
-			action: null,
+			action: null
 		});
 	},
 
@@ -83,14 +89,14 @@ module.exports = Field.create({
 					if (!self.isMounted()) return;
 					self.setState({
 						localSource: e.target.result,
-						origin: 'local',
+						origin: 'local'
 					});
 				};
 				fileReader.readAsDataURL(f);
 			});
 		} else {
 			this.setState({
-				origin: 'local',
+				origin: 'local'
 			});
 		}
 	},
@@ -101,7 +107,7 @@ module.exports = Field.create({
 	removeMedia  (e) {
 		var state = {
 			localSource: null,
-			origin: false,
+			origin: false
 		};
 
 		if (this.hasLocal()) {
@@ -194,8 +200,11 @@ module.exports = Field.create({
 
 	renderMediaPreviewThumbnail () {
 
-
-		var url = this.getMediaURL();
+		var url = this.getThumbnailURL();
+		if(url){
+			return <img key={this.props.path + '_preview_thumbnail'} className="img-load" style={{ height: '90' }} src={url} />;;
+		}
+		url = this.getMediaURL();
 
 		if (url) {
 			url = url.replace(/image\/upload/, 'image/upload/c_thumb,g_face,h_90,w_90');

@@ -19,7 +19,7 @@ module.exports = Field.create({
 
 	getDefaultProps: function() {
 		return {
-			formatString: 'YYYY-MM-DD, h:mm a'
+			formatString: 'YYYY-MM-DD, h:mm a Z'
 		};
 	},
 

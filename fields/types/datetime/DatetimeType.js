@@ -4,7 +4,7 @@ var FieldType = require('../Type');
 var util = require('util');
 var _ = require('underscore');
 
-var parseFormats = ['YYYY-MM-DD', 'YYYY-MM-DD h:m:s a', 'YYYY-MM-DD h:m a', 'YYYY-MM-DD H:m:s', 'YYYY-MM-DD H:m'];
+var parseFormats = ['YYYY-MM-DD', 'YYYY-MM-DD h:m:s a', 'YYYY-MM-DD h:m a', 'YYYY-MM-DD H:m:s', 'YYYY-MM-DD H:m', 'YYYY-MM-DD h:mm:s a Z', moment.ISO_8601];
 
 /**
  * DateTime FieldType Constructor
@@ -15,38 +15,10 @@ function datetime(list, path, options) {
 	this._nativeType = Date;
 	this._underscoreMethods = ['format', 'moment', 'parse'];
 	this._fixedSize = 'large';
-	this._properties = ['formatString', 'dateFormat', 'timeFormat', 'datePlaceholder', 'timePlaceholder', 'isUTC'];
+	this._properties = ['formatString', 'isUTC'];
 	this.typeDescription = 'date and time';
 	this.parseFormatString = options.parseFormat || parseFormats;
 	this.formatString = (options.format === false) ? false : (options.format || 'YYYY-MM-DD h:mm:ss a');
-
-	// Create an array of moment time format characters to help find where the time portion of the format string beings
-	var timeOptions = ['h', 'H', 'm', 's', 'S'];
-	var timeIndex = -1;
-
-	var that = this;
-
-	if(this.formatString) {
-		// Loop through each moment time format character to determine which begins the time portion of format to segregate date from time
-		_.each(timeOptions, function(timeChar) {
-			var charIndex = that.formatString.indexOf(timeChar);
-
-			if((charIndex !== -1 && charIndex < timeIndex) || (charIndex !== -1 && timeIndex === -1)) {
-				timeIndex = charIndex;
-			}
-		});
-
-		this.dateFormat = this.formatString.slice(0, timeIndex).trim();
-		this.timeFormat = this.formatString.slice(timeIndex).trim();
-		this.datePlaceholder = 'e.g. ' + moment().format(this.dateFormat);
-		this.timePlaceholder = 'e.g. ' + moment().format(this.timeFormat);
-
-	} else {
-		this.dateFormat = '';
-		this.timeFormat = '';
-		this.datePlaceholder = '';
-		this.timePlaceholder = '';
-	}
 
 	this.isUTC = options.utc || false;
 	if (this.formatString && 'string' !== typeof this.formatString) {
@@ -55,7 +27,8 @@ function datetime(list, path, options) {
 	datetime.super_.call(this, list, path, options);
 	this.paths = {
 		date: this._path.append('_date'),
-		time: this._path.append('_time')
+		time: this._path.append('_time'),
+		tzOffset: this._path.append('_tzOffset')
 	};
 }
 util.inherits(datetime, FieldType);
@@ -70,11 +43,17 @@ datetime.prototype.parse = DateType.prototype.parse;
  * Get the value from a data object; may be simple or a pair of fields
  */
 datetime.prototype.getInputFromData = function(data) {
-	if (this.paths.date in data && this.paths.time in data) {
-		return (data[this.paths.date] + ' ' + data[this.paths.time]).trim();
-	} else {
-		return data[this.path];
+	var dateValue = data[this.paths.date];
+	var timeValue = data[this.paths.time];
+	var tzOffsetValue = data[this.paths.tzOffset];
+	if (dateValue && timeValue) {
+		var ret = dateValue + ' ' + timeValue;
+		if (typeof tzOffsetValue !== 'undefined') {
+			ret += ' ' + tzOffsetValue;
+		}
+		return ret;
 	}
+	return data[this.path];
 };
 
 /**
@@ -101,7 +80,7 @@ datetime.prototype.updateItem = function(item, data) {
 		return;
 	}
 	var m = this.isUTC ? moment.utc : moment;
-	var newValue = m(this.getInputFromData(data), this.formatString);
+	var newValue = m(this.getInputFromData(data), this.parseFormatString);
 	if (newValue.isValid()) {
 		if (!item.get(this.path) || !newValue.isSame(item.get(this.path))) {
 			item.set(this.path, newValue.toDate());

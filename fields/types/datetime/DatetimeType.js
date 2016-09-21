@@ -15,10 +15,38 @@ function datetime(list, path, options) {
 	this._nativeType = Date;
 	this._underscoreMethods = ['format', 'moment', 'parse'];
 	this._fixedSize = 'large';
-	this._properties = ['formatString', 'isUTC'];
+	this._properties = ['formatString', 'dateFormat', 'timeFormat', 'datePlaceholder', 'timePlaceholder', 'isUTC'];
 	this.typeDescription = 'date and time';
 	this.parseFormatString = options.parseFormat || parseFormats;
 	this.formatString = (options.format === false) ? false : (options.format || 'YYYY-MM-DD h:mm:ss a');
+
+	// Create an array of moment time format characters to help find where the time portion of the format string beings
+	var timeOptions = ['h', 'H', 'm', 's', 'S'];
+	var timeIndex = -1;
+
+	var that = this;
+
+	if(this.formatString) {
+		// Loop through each moment time format character to determine which begins the time portion of format to segregate date from time
+		_.each(timeOptions, function(timeChar) {
+			var charIndex = that.formatString.indexOf(timeChar);
+
+			if((charIndex !== -1 && charIndex < timeIndex) || (charIndex !== -1 && timeIndex === -1)) {
+				timeIndex = charIndex;
+			}
+		});
+
+		this.dateFormat = this.formatString.slice(0, timeIndex).trim();
+		this.timeFormat = this.formatString.slice(timeIndex).trim();
+		this.datePlaceholder = 'e.g. ' + moment().format(this.dateFormat);
+		this.timePlaceholder = 'e.g. ' + moment().format(this.timeFormat);
+
+	} else {
+		this.dateFormat = '';
+		this.timeFormat = '';
+		this.datePlaceholder = '';
+		this.timePlaceholder = '';
+	}
 
 	this.isUTC = options.utc || false;
 	if (this.formatString && 'string' !== typeof this.formatString) {
